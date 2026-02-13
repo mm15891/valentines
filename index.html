@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Love 💕</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Crimson+Text:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            overflow: hidden;
+            height: 100vh;
+            background: linear-gradient(135deg, #ffeef8 0%, #ffe0f0 25%, #ffd4e8 50%, #ffcce3 75%, #ffc4df 100%);
+            position: relative;
+        }
+
+        /* Floating hearts background */
+        .heart-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            opacity: 0;
+            animation: fadeInHearts 2s ease-in 3s forwards;
+        }
+
+        .floating-heart {
+            position: absolute;
+            font-size: 20px;
+            opacity: 0.3;
+            animation: floatHeart 15s infinite ease-in-out;
+        }
+
+        @keyframes floatHeart {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.3;
+            }
+            90% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-10vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes fadeInHearts {
+            to { opacity: 1; }
+        }
+
+        /* Message container - hidden initially */
+        .message-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .message-container.revealed {
+            animation: revealMessage 2s ease-out forwards;
+            pointer-events: auto;
+        }
+
+        /* Question container - hidden initially */
+        .question-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 3rem 4rem;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(214, 51, 132, 0.2);
+            backdrop-filter: blur(10px);
+            max-width: 500px;
+        }
+
+        .question-container.revealed {
+            animation: revealMessage 1.5s ease-out forwards;
+            pointer-events: auto;
+        }
+
+        .question-container h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 400;
+            color: #d63384;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.02em;
+        }
+
+        .question-text {
+            font-family: 'Crimson Text', serif;
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            color: #8b4464;
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+
+        .checkbox-container {
+            margin: 1rem 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-family: 'Crimson Text', serif;
+            font-size: 1.3rem;
+            color: #8b4464;
+            gap: 1rem;
+        }
+
+        .checkbox-label input[type="radio"],
+        .checkbox-label input[type="checkbox"] {
+            display: none;
+        }
+
+        .checkbox-custom {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #ff8fb3;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .checkbox-label:hover .checkbox-custom {
+            border-color: #ff6b9d;
+            transform: scale(1.1);
+        }
+
+        .checkbox-label input[type="radio"]:checked + .checkbox-custom,
+        .checkbox-label input[type="checkbox"]:checked + .checkbox-custom {
+            background: linear-gradient(135deg, #ff6b9d 0%, #ffa8c5 100%);
+            border-color: #ff6b9d;
+        }
+
+        .checkbox-label input[type="radio"]:checked + .checkbox-custom::after,
+        .checkbox-label input[type="checkbox"]:checked + .checkbox-custom::after {
+            content: '●';
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .submit-button, .retry-button {
+            background: linear-gradient(135deg, #ff6b9d 0%, #ffa8c5 100%);
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(214, 51, 132, 0.3);
+            margin-top: 1rem;
+        }
+
+        .submit-button:hover, .retry-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(214, 51, 132, 0.4);
+        }
+
+        .submit-button:active, .retry-button:active {
+            transform: translateY(0);
+        }
+
+        /* Failure container */
+        .failure-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 3rem 4rem;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(139, 68, 100, 0.2);
+            backdrop-filter: blur(10px);
+            max-width: 500px;
+        }
+
+        .failure-container.revealed {
+            animation: revealMessage 1.5s ease-out forwards;
+            pointer-events: auto;
+        }
+
+        .failure-container h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 300;
+            color: #8b4464;
+            margin-bottom: 1.5rem;
+        }
+
+        .failure-title {
+            font-size: clamp(2.5rem, 6vw, 5rem) !important;
+            font-weight: 700 !important;
+            color: #c1487f !important;
+            letter-spacing: 0.05em;
+            text-shadow: 3px 3px 0px rgba(139, 68, 100, 0.2);
+            margin-bottom: 2rem !important;
+        }
+
+        .failure-container p {
+            font-family: 'Crimson Text', serif;
+            font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+            color: #8b4464;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .sea-lion-emoji {
+            font-size: 4rem;
+            margin: 2rem 0;
+        }
+
+        .small-text {
+            font-size: 1rem;
+            font-style: italic;
+            opacity: 0.8;
+        }
+
+        @keyframes revealMessage {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .message-container h1 {
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 300;
+            color: #d63384;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.02em;
+            line-height: 1.2;
+        }
+
+        .message-container p {
+            font-family: 'Crimson Text', serif;
+            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            color: #8b4464;
+            max-width: 600px;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+
+        .signature {
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            color: #c1487f;
+            font-weight: 600;
+            margin-top: 2rem;
+        }
+
+        /* Butterfly container */
+        .butterfly-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            z-index: 10;
+            animation: butterflyIdle 3s ease-in-out infinite;
+        }
+
+        .butterfly-container.flying {
+            animation: flyAway 3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes butterflyIdle {
+            0%, 100% {
+                transform: translate(-50%, -50%) translateY(0px);
+            }
+            50% {
+                transform: translate(-50%, -50%) translateY(-15px);
+            }
+        }
+
+        @keyframes flyAway {
+            0% {
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            30% {
+                transform: translate(-30%, -60%) scale(1.2) rotate(20deg);
+            }
+            60% {
+                transform: translate(50%, -120%) scale(0.8) rotate(-15deg);
+            }
+            100% {
+                transform: translate(120%, -200%) scale(0.3) rotate(45deg);
+                opacity: 0;
+            }
+        }
+
+        .butterfly {
+            width: 120px;
+            height: 120px;
+            position: relative;
+            filter: drop-shadow(0 4px 20px rgba(214, 51, 132, 0.3));
+        }
+
+        .wing {
+            position: absolute;
+            width: 50px;
+            height: 60px;
+            border-radius: 50% 50% 50% 10%;
+            background: linear-gradient(135deg, #ff6b9d 0%, #ffa8c5 50%, #ffd4e5 100%);
+            transform-origin: bottom right;
+            animation: flapWing 0.3s ease-in-out infinite;
+        }
+
+        .wing.left {
+            left: 10px;
+            top: 20px;
+            transform: rotate(-30deg);
+        }
+
+        .wing.right {
+            right: 10px;
+            top: 20px;
+            transform: rotate(30deg) scaleX(-1);
+            animation-delay: 0.15s;
+        }
+
+        .wing.bottom-left {
+            left: 15px;
+            bottom: 20px;
+            width: 40px;
+            height: 50px;
+            border-radius: 50% 10% 50% 50%;
+            background: linear-gradient(135deg, #ff8fb3 0%, #ffb8d2 50%, #ffe0ed 100%);
+            transform: rotate(-40deg);
+            animation-delay: 0.075s;
+        }
+
+        .wing.bottom-right {
+            right: 15px;
+            bottom: 20px;
+            width: 40px;
+            height: 50px;
+            border-radius: 10% 50% 50% 50%;
+            background: linear-gradient(135deg, #ff8fb3 0%, #ffb8d2 50%, #ffe0ed 100%);
+            transform: rotate(40deg);
+            animation-delay: 0.225s;
+        }
+
+        @keyframes flapWing {
+            0%, 100% {
+                transform: rotate(-30deg) scaleY(1);
+            }
+            50% {
+                transform: rotate(-30deg) scaleY(0.85);
+            }
+        }
+
+        .wing.right {
+            animation-name: flapWingRight;
+        }
+
+        @keyframes flapWingRight {
+            0%, 100% {
+                transform: rotate(30deg) scaleX(-1) scaleY(1);
+            }
+            50% {
+                transform: rotate(30deg) scaleX(-1) scaleY(0.85);
+            }
+        }
+
+        .wing.bottom-left {
+            animation-name: flapWingBottomLeft;
+        }
+
+        @keyframes flapWingBottomLeft {
+            0%, 100% {
+                transform: rotate(-40deg) scaleY(1);
+            }
+            50% {
+                transform: rotate(-40deg) scaleY(0.85);
+            }
+        }
+
+        .wing.bottom-right {
+            animation-name: flapWingBottomRight;
+        }
+
+        @keyframes flapWingBottomRight {
+            0%, 100% {
+                transform: rotate(40deg) scaleY(1);
+            }
+            50% {
+                transform: rotate(40deg) scaleY(0.85);
+            }
+        }
+
+        .butterfly-body {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 70px;
+            background: linear-gradient(180deg, #8b4464 0%, #6b3451 100%);
+            border-radius: 10px;
+        }
+
+        .antenna {
+            position: absolute;
+            width: 2px;
+            height: 20px;
+            background: #6b3451;
+            top: -15px;
+            left: 50%;
+        }
+
+        .antenna.left {
+            transform: translateX(-3px) rotate(-20deg);
+            transform-origin: bottom;
+        }
+
+        .antenna.right {
+            transform: translateX(1px) rotate(20deg);
+            transform-origin: bottom;
+        }
+
+        .antenna::after {
+            content: '';
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: #d63384;
+            border-radius: 50%;
+            top: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Click instruction */
+        .click-instruction {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Crimson Text', serif;
+            font-size: 1.2rem;
+            color: #c1487f;
+            opacity: 0.7;
+            animation: pulse 2s ease-in-out infinite;
+            z-index: 5;
+        }
+
+        .click-instruction.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.7;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* Sparkle effect */
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @keyframes sparkleAnimation {
+            0% {
+                opacity: 0;
+                transform: scale(0) rotate(0deg);
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.5) rotate(180deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating hearts background -->
+    <div class="heart-container" id="heartContainer"></div>
+
+    <!-- Click instruction -->
+    <div class="click-instruction" id="clickInstruction">
+        Click the butterfly ✨
+    </div>
+
+    <!-- Butterfly -->
+    <div class="butterfly-container" id="butterflyContainer">
+        <div class="butterfly">
+            <div class="wing left"></div>
+            <div class="wing right"></div>
+            <div class="wing bottom-left"></div>
+            <div class="wing bottom-right"></div>
+            <div class="butterfly-body">
+                <div class="antenna left"></div>
+                <div class="antenna right"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sea Lion Question (appears after butterfly) -->
+    <div class="question-container" id="questionContainer">
+        <h2>One Important Question...</h2>
+        <p class="question-text">Do you like sea lions?</p>
+        <div class="checkbox-container">
+            <label class="checkbox-label">
+                <input type="radio" name="sealion" id="sealionYes">
+                <span class="checkbox-custom"></span>
+                <span class="checkbox-text">Yes, I love sea lions! 🦭</span>
+            </label>
+        </div>
+        <div class="checkbox-container">
+            <label class="checkbox-label">
+                <input type="radio" name="sealion" id="sealionNo">
+                <span class="checkbox-custom"></span>
+                <span class="checkbox-text">No, I don't like sea lions 😔</span>
+            </label>
+        </div>
+        <button id="submitButton" class="submit-button">Continue</button>
+    </div>
+
+    <!-- Success Message (shown if they like sea lions) -->
+    <div class="message-container" id="messageContainer">
+        <h1>Happy Valentine's Day</h1>
+        <p>
+            You are the light in my life, the joy in my heart, and the love of my dreams.
+            Every moment with you is a treasure I hold close.
+        </p>
+        <div class="signature">Forever Yours ❤️</div>
+    </div>
+
+    <!-- Failure Screen (shown if they don't like sea lions) -->
+    <div class="failure-container" id="failureContainer">
+        <h1 class="failure-title">YOU HAVE FAILED</h1>
+        <div class="sea-lion-emoji">🦭💔</div>
+        <p>
+            The sea lions are disappointed in you.
+        </p>
+        <p class="small-text">(Okay fine, you can try again... 😄)</p>
+        <button id="retryButton" class="retry-button">Reconsider Your Answer</button>
+    </div>
+
+    <script>
+        // Create floating hearts
+        const heartContainer = document.getElementById('heartContainer');
+        const heartSymbols = ['💕', '💖', '💗', '💓', '💝'];
+        
+        for (let i = 0; i < 15; i++) {
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart';
+            heart.textContent = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.animationDelay = Math.random() * 15 + 's';
+            heart.style.fontSize = (Math.random() * 15 + 15) + 'px';
+            heartContainer.appendChild(heart);
+        }
+
+        // Butterfly click handler
+        const butterflyContainer = document.getElementById('butterflyContainer');
+        const messageContainer = document.getElementById('messageContainer');
+        const questionContainer = document.getElementById('questionContainer');
+        const failureContainer = document.getElementById('failureContainer');
+        const clickInstruction = document.getElementById('clickInstruction');
+        const submitButton = document.getElementById('submitButton');
+        const retryButton = document.getElementById('retryButton');
+        const sealionYes = document.getElementById('sealionYes');
+        const sealionNo = document.getElementById('sealionNo');
+
+        function createSparkles(x, y) {
+            for (let i = 0; i < 12; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = x + 'px';
+                sparkle.style.top = y + 'px';
+                
+                const angle = (Math.PI * 2 * i) / 12;
+                const distance = 50 + Math.random() * 50;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                
+                sparkle.style.animation = `sparkleAnimation 1s ease-out forwards`;
+                sparkle.style.setProperty('--tx', tx + 'px');
+                sparkle.style.setProperty('--ty', ty + 'px');
+                
+                document.body.appendChild(sparkle);
+                
+                setTimeout(() => sparkle.remove(), 1000);
+            }
+        }
+
+        // Add sparkle animation keyframes dynamically
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes sparkleAnimation {
+                0% {
+                    opacity: 0;
+                    transform: translate(0, 0) scale(0);
+                }
+                50% {
+                    opacity: 1;
+                }
+                100% {
+                    opacity: 0;
+                    transform: translate(var(--tx, 0), var(--ty, 0)) scale(1.5);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        butterflyContainer.addEventListener('click', function(e) {
+            const rect = butterflyContainer.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            createSparkles(centerX, centerY);
+            
+            butterflyContainer.classList.add('flying');
+            clickInstruction.classList.add('hidden');
+            
+            // Show question after butterfly flies away
+            setTimeout(() => {
+                questionContainer.classList.add('revealed');
+            }, 2000);
+        });
+
+        // Handle submit button
+        submitButton.addEventListener('click', function() {
+            if (sealionYes.checked) {
+                // They like sea lions! Show success message
+                questionContainer.classList.remove('revealed');
+                setTimeout(() => {
+                    questionContainer.style.opacity = '0';
+                    messageContainer.classList.add('revealed');
+                }, 500);
+            } else if (sealionNo.checked) {
+                // They don't like sea lions! Show failure screen
+                questionContainer.classList.remove('revealed');
+                setTimeout(() => {
+                    questionContainer.style.opacity = '0';
+                    failureContainer.classList.add('revealed');
+                }, 500);
+            }
+        });
+
+        // Handle retry button
+        retryButton.addEventListener('click', function() {
+            failureContainer.classList.remove('revealed');
+            setTimeout(() => {
+                failureContainer.style.opacity = '0';
+                sealionYes.checked = false;
+                sealionNo.checked = false;
+                questionContainer.style.opacity = '1';
+                questionContainer.classList.add('revealed');
+            }, 500);
+        });
+
+        // Optional: Auto-reveal after 10 seconds if user doesn't click
+        setTimeout(() => {
+            if (!butterflyContainer.classList.contains('flying')) {
+                const rect = butterflyContainer.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                createSparkles(centerX, centerY);
+                
+                butterflyContainer.classList.add('flying');
+                clickInstruction.classList.add('hidden');
+                
+                setTimeout(() => {
+                    questionContainer.classList.add('revealed');
+                }, 2000);
+            }
+        }, 10000);
+    </script>
+</body>
+</html>
